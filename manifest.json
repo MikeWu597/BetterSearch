@@ -4,7 +4,11 @@
   "version": "1.0",
   "description": "A better search extension for Edge",
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": "icons/128.png"
+  },
+  "icons": {
+    "128": "icons/128.png"
   },
   "content_scripts": [
     {
