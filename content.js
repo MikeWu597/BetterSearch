@@ -3,12 +3,14 @@
 (function() {
     'use strict';
   
-    // Function to remove search results containing blocked domains
+    // Function to remove search results containing blocked domains or keywords
     function removeBlockedResults() {
-      // Get blocked domains from storage
-      chrome.storage.sync.get(['blockedDomains'], function(result) {
+      // Get blocked domains, title keywords and description keywords from storage
+      chrome.storage.sync.get(['blockedDomains', 'blockedKeywords', 'blockedDescKeywords'], function(result) {
         const blockedDomains = result.blockedDomains || [];
-        console.log('[BetterSearch] Starting to check search results. Blocked domains:', blockedDomains);
+        const blockedKeywords = result.blockedKeywords || [];
+        const blockedDescKeywords = result.blockedDescKeywords || [];
+        console.log('[BetterSearch] Starting to check search results. Blocked domains:', blockedDomains, 'Blocked title keywords:', blockedKeywords, 'Blocked description keywords:', blockedDescKeywords);
         
         // Find all search result items
         const searchResults = document.querySelectorAll('li.b_algo');
@@ -19,22 +21,47 @@
           // Find cite elements within each search result
           const citeElement = result.querySelector('cite');
           
-          if (citeElement) {
-            console.log(`[BetterSearch] Checking result ${index}: ${citeElement.textContent}`);
+          // Find title elements (h2) within each search result
+          const titleElement = result.querySelector('h2 a');
+          
+          // Find description elements with class b_lineclamp2 within each search result
+          const descElement = result.querySelector('.b_lineclamp2');
+          
+          if (citeElement || titleElement || descElement) {
+            let shouldBlock = false;
             
             // Check if the cite text contains any of the blocked domains
-            const shouldBlock = blockedDomains.some(domain => 
-              citeElement.textContent.includes(domain)
-            );
+            if (citeElement) {
+              console.log(`[BetterSearch] Checking result ${index} cite: ${citeElement.textContent}`);
+              shouldBlock = blockedDomains.some(domain => 
+                citeElement.textContent.includes(domain)
+              );
+            }
+            
+            // Check if the title text contains any of the blocked keywords
+            if (!shouldBlock && titleElement) {
+              console.log(`[BetterSearch] Checking result ${index} title: ${titleElement.textContent}`);
+              shouldBlock = blockedKeywords.some(keyword => 
+                titleElement.textContent.includes(keyword)
+              );
+            }
+            
+            // Check if the description text contains any of the blocked keywords
+            if (!shouldBlock && descElement) {
+              console.log(`[BetterSearch] Checking result ${index} description: ${descElement.textContent}`);
+              shouldBlock = blockedDescKeywords.some(keyword => 
+                descElement.textContent.includes(keyword)
+              );
+            }
             
             if (shouldBlock) {
-              console.log(`[BetterSearch] Removing result ${index} with cite: ${citeElement.textContent}`);
+              console.log(`[BetterSearch] Removing result ${index}`);
               // Remove the entire search result
               result.remove();
               removedCount++;
             }
           } else {
-            console.log(`[BetterSearch] No cite element found in result ${index}`);
+            console.log(`[BetterSearch] No cite, title or description element found in result ${index}`);
           }
         });
         
