@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "BetterSearch",
   "version": "1.0",
-  "description": "A better search extension for Edge",
+  "description": "Blocks search results based on custom domain and keyword filters",
   "action": {
     "default_popup": "popup.html",
     "default_icon": "icons/128.png"
