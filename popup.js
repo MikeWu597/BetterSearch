@@ -14,6 +14,11 @@ document.addEventListener('DOMContentLoaded', function() {
   const descKeywordInput = document.getElementById('desc-keyword-input');
   const addDescKeywordButton = document.getElementById('add-desc-keyword');
   const descKeywordList = document.getElementById('desc-keyword-list');
+  
+  // Get DOM elements for import/export
+  const exportConfigButton = document.getElementById('export-config');
+  const importConfigButton = document.getElementById('import-config');
+  const importFileInput = document.getElementById('import-file');
 
   // Load domains, keywords and description keywords from storage and display them
   loadDomains();
@@ -49,6 +54,17 @@ document.addEventListener('DOMContentLoaded', function() {
       addDescKeyword();
     }
   });
+  
+  // Export configuration button click event
+  exportConfigButton.addEventListener('click', exportConfiguration);
+  
+  // Import configuration button click event
+  importConfigButton.addEventListener('click', function() {
+    importFileInput.click();
+  });
+  
+  // Import file change event
+  importFileInput.addEventListener('change', importConfiguration);
 
   // Load domains from chrome storage
   function loadDomains() {
@@ -256,5 +272,69 @@ document.addEventListener('DOMContentLoaded', function() {
         displayDescKeywords(updatedDescKeywords);
       });
     });
+  }
+  
+  // Export configuration to a JSON file
+  function exportConfiguration() {
+    chrome.storage.sync.get(['blockedDomains', 'blockedKeywords', 'blockedDescKeywords'], function(result) {
+      const config = {
+        blockedDomains: result.blockedDomains || [],
+        blockedKeywords: result.blockedKeywords || [],
+        blockedDescKeywords: result.blockedDescKeywords || []
+      };
+      
+      const dataStr = JSON.stringify(config, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      
+      const exportFileDefaultName = 'bettersearch-config.json';
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+    });
+  }
+  
+  // Import configuration from a JSON file
+  function importConfiguration(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const config = JSON.parse(e.target.result);
+        
+        // Validate the imported configuration
+        if (typeof config !== 'object' || config === null) {
+          throw new Error('Invalid configuration file');
+        }
+        
+        // Extract the lists, defaulting to empty arrays if not present
+        const blockedDomains = Array.isArray(config.blockedDomains) ? config.blockedDomains : [];
+        const blockedKeywords = Array.isArray(config.blockedKeywords) ? config.blockedKeywords : [];
+        const blockedDescKeywords = Array.isArray(config.blockedDescKeywords) ? config.blockedDescKeywords : [];
+        
+        // Save the imported configuration, completely replacing the existing data
+        chrome.storage.sync.set({
+          blockedDomains: blockedDomains,
+          blockedKeywords: blockedKeywords,
+          blockedDescKeywords: blockedDescKeywords
+        }, function() {
+          // Update the UI with the imported data
+          displayDomains(blockedDomains);
+          displayKeywords(blockedKeywords);
+          displayDescKeywords(blockedDescKeywords);
+          
+          alert('Configuration imported successfully!');
+        });
+      } catch (error) {
+        alert('Error importing configuration: ' + error.message);
+      }
+    };
+    
+    reader.readAsText(file);
+    // Reset the file input to allow importing the same file again
+    event.target.value = '';
   }
 });

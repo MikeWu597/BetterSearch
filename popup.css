@@ -23,13 +23,15 @@ h2 {
 .domain-manager h3,
 .title-keyword-manager h3,
 .description-keyword-manager h3,
+.import-export h3,
 .disclaimer h3 {
   margin-top: 10px;
   margin-bottom: 10px;
   color: #555;
 }
 
-.input-group {
+.input-group,
+.button-group {
   display: flex;
   margin-bottom: 15px;
 }
@@ -45,7 +47,9 @@ h2 {
 
 #add-domain,
 #add-keyword,
-#add-desc-keyword {
+#add-desc-keyword,
+#import-config,
+#export-config {
   padding: 8px 12px;
   background-color: #0078d4;
   color: white;
@@ -56,8 +60,21 @@ h2 {
 
 #add-domain:hover,
 #add-keyword:hover,
-#add-desc-keyword:hover {
+#add-desc-keyword:hover,
+#import-config:hover,
+#export-config:hover {
   background-color: #005a9e;
+}
+
+#import-config,
+#export-config {
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+#import-config:last-child,
+#export-config:last-child {
+  margin-right: 0;
 }
 
 #domain-list,
