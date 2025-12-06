@@ -10,6 +10,10 @@
     {
       "matches": ["https://www.bing.com/*", "https://*.bing.com/*", "https://bing.com/*"],
       "js": ["content.js"]
+    },
+    {
+      "matches": ["https://www.google.com/search*", "https://google.com/search*"],
+      "js": ["content_google.js"]
     }
   ],
   "permissions": [
