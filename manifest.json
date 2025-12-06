@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "BetterSearch",
+  "version": "1.0",
+  "description": "A better search extension for Edge",
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.bing.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "permissions": [
+    "activeTab"
+  ]
+}
