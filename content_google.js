@@ -12,8 +12,8 @@
         const blockedDescKeywords = result.blockedDescKeywords || [];
         console.log('[BetterSearch] Starting to check Google search results. Blocked domains:', blockedDomains, 'Blocked title keywords:', blockedKeywords, 'Blocked description keywords:', blockedDescKeywords);
         
-        // Find all search result items
-        const searchResults = document.querySelectorAll('div.MjjYud');
+        // Find all search result items with data-rpos attribute
+        const searchResults = document.querySelectorAll('div[data-rpos]');
         console.log(`[BetterSearch] Found ${searchResults.length} Google search results`);
         
         let hiddenCount = 0;
@@ -24,8 +24,8 @@
           // Find title elements (h3) within each search result
           const titleElement = result.querySelector('h3');
           
-          // Find description elements within each search result
-          const descElement = result.querySelector('.VwiC3b');
+          // Find description elements with -webkit-line-clamp style
+          const descElement = result.querySelector('[style*="-webkit-line-clamp"]');
           
           if (citeElement || titleElement || descElement) {
             let shouldBlock = false;
