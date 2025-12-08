@@ -19,11 +19,15 @@ document.addEventListener('DOMContentLoaded', function() {
   const exportConfigButton = document.getElementById('export-config');
   const importConfigButton = document.getElementById('import-config');
   const importFileInput = document.getElementById('import-file');
+  
+  // Get DOM element for extension toggle
+  const extensionToggle = document.getElementById('extension-toggle');
 
   // Load domains, keywords and description keywords from storage and display them
   loadDomains();
   loadKeywords();
   loadDescKeywords();
+  loadExtensionStatus();
 
   // Add domain button click event
   addDomainButton.addEventListener('click', addDomain);
@@ -53,6 +57,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (e.key === 'Enter') {
       addDescKeyword();
     }
+  });
+  
+  // Extension toggle change event
+  extensionToggle.addEventListener('change', function() {
+    chrome.storage.sync.set({extensionEnabled: extensionToggle.checked});
   });
   
   // Export configuration button click event
@@ -274,13 +283,22 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
+  // Load extension status from storage
+  function loadExtensionStatus() {
+    chrome.storage.sync.get(['extensionEnabled'], function(result) {
+      // Default to enabled if not set
+      extensionToggle.checked = result.extensionEnabled !== false;
+    });
+  }
+  
   // Export configuration to a JSON file
   function exportConfiguration() {
-    chrome.storage.sync.get(['blockedDomains', 'blockedKeywords', 'blockedDescKeywords'], function(result) {
+    chrome.storage.sync.get(['blockedDomains', 'blockedKeywords', 'blockedDescKeywords', 'extensionEnabled'], function(result) {
       const config = {
         blockedDomains: result.blockedDomains || [],
         blockedKeywords: result.blockedKeywords || [],
-        blockedDescKeywords: result.blockedDescKeywords || []
+        blockedDescKeywords: result.blockedDescKeywords || [],
+        extensionEnabled: result.extensionEnabled !== false
       };
       
       const dataStr = JSON.stringify(config, null, 2);
@@ -314,17 +332,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const blockedDomains = Array.isArray(config.blockedDomains) ? config.blockedDomains : [];
         const blockedKeywords = Array.isArray(config.blockedKeywords) ? config.blockedKeywords : [];
         const blockedDescKeywords = Array.isArray(config.blockedDescKeywords) ? config.blockedDescKeywords : [];
+        const extensionEnabled = typeof config.extensionEnabled === 'boolean' ? config.extensionEnabled : true;
         
         // Save the imported configuration, completely replacing the existing data
         chrome.storage.sync.set({
           blockedDomains: blockedDomains,
           blockedKeywords: blockedKeywords,
-          blockedDescKeywords: blockedDescKeywords
+          blockedDescKeywords: blockedDescKeywords,
+          extensionEnabled: extensionEnabled
         }, function() {
           // Update the UI with the imported data
           displayDomains(blockedDomains);
           displayKeywords(blockedKeywords);
           displayDescKeywords(blockedDescKeywords);
+          extensionToggle.checked = extensionEnabled;
           
           alert('Configuration imported successfully!');
         });

@@ -5,8 +5,14 @@
   
     // Function to hide search results containing blocked domains or keywords
     function hideBlockedResults() {
-      // Get blocked domains, title keywords and description keywords from storage
-      chrome.storage.sync.get(['blockedDomains', 'blockedKeywords', 'blockedDescKeywords'], function(result) {
+      // Get extension status and blocked items from storage
+      chrome.storage.sync.get(['extensionEnabled', 'blockedDomains', 'blockedKeywords', 'blockedDescKeywords'], function(result) {
+        // Check if extension is enabled
+        if (result.extensionEnabled === false) {
+          console.log('[BetterSearch] Extension is disabled');
+          return;
+        }
+        
         const blockedDomains = result.blockedDomains || [];
         const blockedKeywords = result.blockedKeywords || [];
         const blockedDescKeywords = result.blockedDescKeywords || [];
