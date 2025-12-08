@@ -2,6 +2,15 @@
 
 (function() {
     'use strict';
+    
+    // Store reference to the notification element
+    let notificationContainer = null;
+    // Store blocked items for display
+    let blockedItems = [];
+    // Track if we've found any search results
+    let hasSearchResults = false;
+    // Track previous blocked count to avoid unnecessary updates
+    let previousBlockedCount = 0;
   
     // Function to hide search results containing blocked domains, titles or descriptions
     function hideBlockedResults() {
@@ -9,6 +18,7 @@
       chrome.storage.sync.get(['extensionEnabled', 'blockedDomains', 'blockedKeywords', 'blockedDescKeywords'], function(result) {
         // Check if extension is enabled
         if (result.extensionEnabled === false) {
+          hideNotification();
           console.log('[BetterSearch] Extension is disabled');
           return;
         }
@@ -22,8 +32,13 @@
         const searchResults = document.querySelectorAll('div[data-rpos]');
         console.log(`[BetterSearch] Found ${searchResults.length} Google search results`);
         
+        // Update hasSearchResults flag
+        if (searchResults.length > 0) {
+          hasSearchResults = true;
+        }
+        
         let hiddenCount = 0;
-        const hiddenItems = [];
+        const newBlockedItems = [];
         searchResults.forEach((result, index) => {
           // Skip if already hidden
           if (result.style.display === 'none') {
@@ -110,12 +125,12 @@
               hiddenCount++;
               // Collect information about hidden items
               if (titleElement) {
-                hiddenItems.push({
+                newBlockedItems.push({
                   title: titleElement.textContent,
                   reason: blockReason
                 });
               } else if (citeElement) {
-                hiddenItems.push({
+                newBlockedItems.push({
                   title: citeElement.textContent,
                   reason: blockReason
                 });
@@ -128,17 +143,33 @@
         
         console.log(`[BetterSearch] Finished checking Google results. Hidden ${hiddenCount} results.`);
         
-        // Show notification if any results were hidden
-        if (hiddenCount > 0) {
-          showNotification(hiddenCount, hiddenItems);
+        // Update blocked items list only if we have new items
+        if (newBlockedItems.length > 0) {
+          blockedItems = blockedItems.concat(newBlockedItems);
+          // Show/update notification
+          if (hasSearchResults) {
+            updateNotification(blockedItems.length);
+          }
+        } else if (hasSearchResults && previousBlockedCount === 0) {
+          // Show initial notification if we have search results but no blocked items
+          updateNotification(0);
         }
+        
+        // Update previous blocked count
+        previousBlockedCount = blockedItems.length;
       });
     }
     
-    // Function to show notification popup
-    function showNotification(count, items) {
-      // Create notification container
-      let notificationContainer = document.getElementById('bettersearch-notification');
+    // Function to update or create the notification
+    function updateNotification(blockedCount) {
+      // Preserve scroll position if notification already exists
+      let scrollTop = 0;
+      if (notificationContainer && notificationContainer.querySelector('div:nth-child(2)')) {
+        const contentArea = notificationContainer.querySelector('div:nth-child(2)');
+        scrollTop = contentArea.scrollTop;
+      }
+      
+      // Create notification container if it doesn't exist
       if (!notificationContainer) {
         notificationContainer = document.createElement('div');
         notificationContainer.id = 'bettersearch-notification';
@@ -171,7 +202,13 @@
         font-weight: bold;
         border-radius: 8px 8px 0 0;
       `;
-      header.textContent = `BetterSearch - Blocked ${count} Result${count > 1 ? 's' : ''}`;
+      
+      if (blockedCount > 0) {
+        header.textContent = `BetterSearch - Blocked ${blockedCount} Result${blockedCount > 1 ? 's' : ''}`;
+      } else {
+        header.textContent = 'BetterSearch - Active';
+      }
+      
       notificationContainer.appendChild(header);
       
       // Create content area
@@ -182,80 +219,87 @@
         overflow-y: auto;
       `;
       
-      // Add hidden items to content
-      items.slice(0, 5).forEach(item => {
-        const itemDiv = document.createElement('div');
-        itemDiv.style.cssText = `
-          margin-bottom: 10px;
-          padding-bottom: 10px;
-          border-bottom: 1px solid #eee;
-        `;
-        
-        const title = document.createElement('div');
-        title.style.cssText = `
-          font-weight: 500;
-          font-size: 14px;
-          margin-bottom: 4px;
-          word-break: break-word;
-        `;
-        title.textContent = item.title;
-        
-        const reason = document.createElement('div');
-        reason.style.cssText = `
-          font-size: 12px;
-          color: #666;
-        `;
-        reason.textContent = item.reason;
-        
-        itemDiv.appendChild(title);
-        itemDiv.appendChild(reason);
-        content.appendChild(itemDiv);
-      });
+      // Restore scroll position after content is added
+      setTimeout(() => {
+        if (content && scrollTop > 0) {
+          content.scrollTop = scrollTop;
+        }
+      }, 0);
       
-      // Add "and X more" if there are more items
-      if (items.length > 5) {
-        const moreDiv = document.createElement('div');
-        moreDiv.style.cssText = `
-          font-size: 12px;
-          color: #666;
-          text-align: center;
-          padding: 8px 0;
+      if (blockedCount > 0) {
+        // Add blocked items to content
+        blockedItems.slice(-5).forEach(item => { // Show last 5 items
+          const itemDiv = document.createElement('div');
+          itemDiv.style.cssText = `
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+          `;
+          
+          const title = document.createElement('div');
+          title.style.cssText = `
+            font-weight: 500;
+            font-size: 14px;
+            margin-bottom: 4px;
+            word-break: break-word;
+          `;
+          title.textContent = item.title;
+          
+          const reason = document.createElement('div');
+          reason.style.cssText = `
+            font-size: 12px;
+            color: #666;
+          `;
+          reason.textContent = item.reason;
+          
+          itemDiv.appendChild(title);
+          itemDiv.appendChild(reason);
+          content.appendChild(itemDiv);
+        });
+        
+        // Add "and X more" if there are more items
+        if (blockedItems.length > 5) {
+          const moreDiv = document.createElement('div');
+          moreDiv.style.cssText = `
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            padding: 8px 0;
+          `;
+          moreDiv.textContent = `and ${blockedItems.length - 5} more`;
+          content.appendChild(moreDiv);
+        }
+      } else {
+        // Add message when no results are blocked
+        const message = document.createElement('div');
+        message.style.cssText = `
+          font-size: 14px;
+          color: #333;
         `;
-        moreDiv.textContent = `and ${items.length - 5} more`;
-        content.appendChild(moreDiv);
+        message.textContent = 'Extension is working but no results matched your filters.';
+        content.appendChild(message);
       }
       
       notificationContainer.appendChild(content);
-      
-      // Create close button
-      const closeBtn = document.createElement('div');
-      closeBtn.style.cssText = `
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        width: 20px;
-        height: 20px;
-        cursor: pointer;
-        font-weight: bold;
-        color: white;
-        text-align: center;
-      `;
-      closeBtn.innerHTML = '&times;';
-      closeBtn.onclick = () => {
-        notificationContainer.remove();
-      };
-      header.appendChild(closeBtn);
-      
-      // Auto-hide after 5 seconds
-      setTimeout(() => {
-        if (notificationContainer.parentNode) {
-          notificationContainer.remove();
-        }
-      }, 5000);
+    }
+    
+    // Function to hide the notification
+    function hideNotification() {
+      if (notificationContainer && notificationContainer.parentNode) {
+        notificationContainer.parentNode.removeChild(notificationContainer);
+        notificationContainer = null;
+      }
+      // Reset state
+      blockedItems = [];
+      hasSearchResults = false;
+      previousBlockedCount = 0;
     }
   
     // Run the function when page loads
-    window.addEventListener('load', hideBlockedResults);
+    window.addEventListener('load', function() {
+      hideNotification(); // Clear any previous state
+      hideBlockedResults();
+    });
     
     // Also run it periodically in case of dynamic content loading
     setInterval(hideBlockedResults, 1000);
