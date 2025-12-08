@@ -1,10 +1,10 @@
-// content_google.js - Content script to remove Google search results based on blocked domains, titles and descriptions
+// content_google.js - Content script to hide Google search results based on blocked domains, titles and descriptions
 
 (function() {
     'use strict';
   
-    // Function to remove search results containing blocked domains, titles or descriptions
-    function removeBlockedResults() {
+    // Function to hide search results containing blocked domains, titles or descriptions
+    function hideBlockedResults() {
       // Get blocked domains, title keywords and description keywords from storage
       chrome.storage.sync.get(['blockedDomains', 'blockedKeywords', 'blockedDescKeywords'], function(result) {
         const blockedDomains = result.blockedDomains || [];
@@ -16,7 +16,7 @@
         const searchResults = document.querySelectorAll('div.MjjYud');
         console.log(`[BetterSearch] Found ${searchResults.length} Google search results`);
         
-        let removedCount = 0;
+        let hiddenCount = 0;
         searchResults.forEach((result, index) => {
           // Find cite elements within each search result
           const citeElement = result.querySelector('cite');
@@ -71,23 +71,23 @@
             }
             
             if (shouldBlock) {
-              console.log(`[BetterSearch] Removing Google result ${index}`);
-              // Remove the entire search result
-              result.remove();
-              removedCount++;
+              console.log(`[BetterSearch] Hiding Google result ${index}`);
+              // Hide the entire search result
+              result.style.display = 'none';
+              hiddenCount++;
             }
           } else {
             console.log(`[BetterSearch] No cite, title or description element found in Google result ${index}`);
           }
         });
         
-        console.log(`[BetterSearch] Finished checking Google results. Removed ${removedCount} results.`);
+        console.log(`[BetterSearch] Finished checking Google results. Hidden ${hiddenCount} results.`);
       });
     }
   
     // Run the function when page loads
-    window.addEventListener('load', removeBlockedResults);
+    window.addEventListener('load', hideBlockedResults);
     
     // Also run it periodically in case of dynamic content loading
-    setInterval(removeBlockedResults, 1000);
+    setInterval(hideBlockedResults, 1000);
   })();
