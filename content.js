@@ -46,27 +46,27 @@
         if (citeElement || titleElement || descElement) {
           let shouldBlock = false;
           
-          // Check if the cite text contains any of the blocked domains
+          // Check if the cite text contains any of the blocked domains (case insensitive)
           if (citeElement) {
             console.log(`[BetterSearch] Checking traditional result ${index} cite: ${citeElement.textContent}`);
             shouldBlock = blockedDomains.some(domain => 
-              citeElement.textContent.includes(domain)
+              citeElement.textContent.toLowerCase().includes(domain.toLowerCase())
             );
           }
           
-          // Check if the title text contains any of the blocked keywords
+          // Check if the title text contains any of the blocked keywords (case insensitive)
           if (!shouldBlock && titleElement) {
             console.log(`[BetterSearch] Checking traditional result ${index} title: ${titleElement.textContent}`);
             shouldBlock = blockedKeywords.some(keyword => 
-              titleElement.textContent.includes(keyword)
+              titleElement.textContent.toLowerCase().includes(keyword.toLowerCase())
             );
           }
           
-          // Check if the description text contains any of the blocked keywords
+          // Check if the description text contains any of the blocked keywords (case insensitive)
           if (!shouldBlock && descElement) {
             console.log(`[BetterSearch] Checking traditional result ${index} description: ${descElement.textContent}`);
             shouldBlock = blockedDescKeywords.some(keyword => 
-              descElement.textContent.includes(keyword)
+              descElement.textContent.toLowerCase().includes(keyword.toLowerCase())
             );
           }
           
@@ -103,31 +103,31 @@
         
         let shouldBlock = false;
         
-        // Check if any cite text contains blocked domains
+        // Check if any cite text contains blocked domains (case insensitive)
         if (citeElements.length > 0) {
           citeElements.forEach((citeElement, citeIndex) => {
             console.log(`[BetterSearch] Checking carousel result ${index} cite ${citeIndex}: ${citeElement.textContent}`);
-            if (blockedDomains.some(domain => citeElement.textContent.includes(domain))) {
+            if (blockedDomains.some(domain => citeElement.textContent.toLowerCase().includes(domain.toLowerCase()))) {
               shouldBlock = true;
             }
           });
         }
         
-        // Check if any title text contains blocked keywords
+        // Check if any title text contains blocked keywords (case insensitive)
         if (!shouldBlock && titleElements.length > 0) {
           titleElements.forEach((titleElement, titleIndex) => {
             console.log(`[BetterSearch] Checking carousel result ${index} title ${titleIndex}: ${titleElement.textContent}`);
-            if (blockedKeywords.some(keyword => titleElement.textContent.includes(keyword))) {
+            if (blockedKeywords.some(keyword => titleElement.textContent.toLowerCase().includes(keyword.toLowerCase()))) {
               shouldBlock = true;
             }
           });
         }
         
-        // Check if any description text contains blocked keywords
+        // Check if any description text contains blocked keywords (case insensitive)
         if (!shouldBlock && descElements.length > 0) {
           descElements.forEach((descElement, descIndex) => {
             console.log(`[BetterSearch] Checking carousel result ${index} description ${descIndex}: ${descElement.textContent}`);
-            if (blockedDescKeywords.some(keyword => descElement.textContent.includes(keyword))) {
+            if (blockedDescKeywords.some(keyword => descElement.textContent.toLowerCase().includes(keyword.toLowerCase()))) {
               shouldBlock = true;
             }
           });

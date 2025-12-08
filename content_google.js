@@ -30,14 +30,14 @@
           if (citeElement || titleElement || descElement) {
             let shouldBlock = false;
             
-            // Check if the cite text contains any of the blocked domains
+            // Check if the cite text contains any of the blocked domains (case insensitive)
             if (citeElement) {
               console.log(`[BetterSearch] Checking Google result ${index} cite: ${citeElement.textContent}`);
               shouldBlock = blockedDomains.some(domain => {
                 // Special handling for the wildcard domain *.bing.com
                 if (domain === '*.bing.com') {
                   // Extract the domain from the cite element
-                  const citeText = citeElement.textContent;
+                  const citeText = citeElement.textContent.toLowerCase();
                   try {
                     // Try to create a URL to easily extract the hostname
                     const url = new URL('http://' + citeText.replace(/^https?:\/\//, ''));
@@ -49,24 +49,24 @@
                     return citeText.includes('.bing.com');
                   }
                 }
-                // Regular domain matching
-                return citeElement.textContent.includes(domain);
+                // Regular domain matching (case insensitive)
+                return citeElement.textContent.toLowerCase().includes(domain.toLowerCase());
               });
             }
             
-            // Check if the title text contains any of the blocked keywords
+            // Check if the title text contains any of the blocked keywords (case insensitive)
             if (!shouldBlock && titleElement) {
               console.log(`[BetterSearch] Checking Google result ${index} title: ${titleElement.textContent}`);
               shouldBlock = blockedKeywords.some(keyword => 
-                titleElement.textContent.includes(keyword)
+                titleElement.textContent.toLowerCase().includes(keyword.toLowerCase())
               );
             }
             
-            // Check if the description text contains any of the blocked keywords
+            // Check if the description text contains any of the blocked keywords (case insensitive)
             if (!shouldBlock && descElement) {
               console.log(`[BetterSearch] Checking Google result ${index} description: ${descElement.textContent}`);
               shouldBlock = blockedDescKeywords.some(keyword => 
-                descElement.textContent.includes(keyword)
+                descElement.textContent.toLowerCase().includes(keyword.toLowerCase())
               );
             }
             
