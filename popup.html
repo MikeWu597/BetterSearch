@@ -10,70 +10,105 @@
   <div id="popup-content">
     <h2>BetterSearch</h2>
     
-    <div class="domain-manager">
-      <h3>Blocked Domains</h3>
+    <!-- Unlock container moved outside main-content -->
+    <div id="unlock-container" style="display: none;">
       <div class="input-group">
-        <input type="text" id="domain-input" placeholder="Enter domain (e.g., block.com)">
-        <button id="add-domain">Add</button>
+        <input type="password" id="unlock-password-input" placeholder="Enter password to unlock">
       </div>
-      <ul id="domain-list"></ul>
-    </div>
-    
-    <div class="title-keyword-manager">
-      <h3>Blocked Title Keywords</h3>
-      <div class="input-group">
-        <input type="text" id="keyword-input" placeholder="Enter keyword to block in titles">
-        <button id="add-keyword">Add</button>
-      </div>
-      <ul id="keyword-list"></ul>
-    </div>
-    
-    <div class="description-keyword-manager">
-      <h3>Blocked Description Keywords</h3>
-      <div class="input-group">
-        <input type="text" id="desc-keyword-input" placeholder="Enter keyword to block in descriptions">
-        <button id="add-desc-keyword">Add</button>
-      </div>
-      <ul id="desc-keyword-list"></ul>
-    </div>
-    
-    <div class="import-export">
-      <h3>Import/Export Configuration</h3>
       <div class="button-group">
-        <button id="export-config">Export</button>
-        <button id="import-config">Import</button>
-        <input type="file" id="import-file" accept=".json" style="display: none;">
+        <button id="unlock-settings">Unlock</button>
       </div>
     </div>
     
-    <div class="note">
-      <p>This extension works with both Bing and Google search results.</p>
-    </div>
-    
-    <div class="toggle-container">
-      <label class="switch">
-        <input type="checkbox" id="extension-toggle">
-        <span class="slider"></span>
-      </label>
-      <span class="toggle-label">Enable BetterSearch</span>
-    </div>
-    
-    <div class="disclaimer">
-      <h3>Disclaimer</h3>
-      <p>This extension is provided for personal use only. All content filtering decisions are made solely by the user. The developer does not control or influence which websites or content are filtered.</p>
-      <p>This extension modifies search results pages based entirely on user-defined criteria. The developer makes no warranties or guarantees regarding its performance or functionality.</p>
-      <p>This extension does not collect, store, or transmit any personal data. All settings are stored locally in your browser.</p>
-    </div>
-    
-    <div class="links">
-      <p>Developed by <a href="https://github.com/MikeWu597" target="_blank">MikeWu597</a></p>
-      <p>Blog: <a href="https://hyp.ink" target="_blank">hyp.ink</a></p>
-    </div>
-    <div class="version">
-      <p>v2.0</p>
-    </div>
-    <div class="copyright">
-      <p>&copy; 2025 MikeWu597. All rights reserved.</p>
+    <div id="main-content">
+      <div class="domain-manager">
+        <h3>Blocked Domains</h3>
+        <div class="input-group">
+          <input type="text" id="domain-input" placeholder="Enter domain (e.g., block.com)">
+          <button id="add-domain">Add</button>
+        </div>
+        <ul id="domain-list"></ul>
+      </div>
+      
+      <div class="title-keyword-manager">
+        <h3>Blocked Title Keywords</h3>
+        <div class="input-group">
+          <input type="text" id="keyword-input" placeholder="Enter keyword to block in titles">
+          <button id="add-keyword">Add</button>
+        </div>
+        <ul id="keyword-list"></ul>
+      </div>
+      
+      <div class="description-keyword-manager">
+        <h3>Blocked Description Keywords</h3>
+        <div class="input-group">
+          <input type="text" id="desc-keyword-input" placeholder="Enter keyword to block in descriptions">
+          <button id="add-desc-keyword">Add</button>
+        </div>
+        <ul id="desc-keyword-list"></ul>
+      </div>
+      
+      <div class="import-export">
+        <h3>Import/Export Configuration</h3>
+        <div class="button-group">
+          <button id="export-config">Export</button>
+          <button id="import-config">Import</button>
+          <input type="file" id="import-file" accept=".json" style="display: none;">
+        </div>
+      </div>
+      
+      <!-- Password protection section -->
+      <div id="password-section">
+        <h3>Password Protection</h3>
+        <div id="set-password-container">
+          <div class="input-group">
+            <input type="password" id="password-input" placeholder="Enter password">
+          </div>
+          <div class="input-group">
+            <input type="password" id="confirm-password-input" placeholder="Confirm password">
+          </div>
+          <div class="button-group">
+            <button id="set-password">Set Password</button>
+          </div>
+        </div>
+        
+        <div id="password-enabled-container" style="display: none;">
+          <p>Password protection is enabled</p>
+          <div class="button-group">
+            <button id="disable-password">Disable Password</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="note">
+        <p>This extension works with both Bing and Google search results.</p>
+      </div>
+      
+      <div class="toggle-container">
+        <label class="switch">
+          <input type="checkbox" id="extension-toggle">
+          <span class="slider"></span>
+        </label>
+        <span class="toggle-label">Enable BetterSearch</span>
+      </div>
+      
+      <div class="disclaimer">
+        <h3>Disclaimer</h3>
+        <p>This extension is provided for personal use only. All content filtering decisions are made solely by the user. The developer does not control or influence which websites or content are filtered.</p>
+        <p>This extension modifies search results pages based entirely on user-defined criteria. The developer makes no warranties or guarantees regarding its performance or functionality.</p>
+        <p>This extension does not collect, store, or transmit any personal data. All settings are stored locally in your browser.</p>
+      </div>
+      
+      <div class="links">
+        <p>Developed by <a href="https://github.com/MikeWu597" target="_blank">MikeWu597</a></p>
+        <p>Blog: <a href="https://hyp.ink" target="_blank">hyp.ink</a></p>
+      </div>
+      <div class="version">
+        <p>v2.0</p>
+      </div>
+      <div class="copyright">
+        <p>&copy; 2025 MikeWu597. All rights reserved.</p>
+      </div>
     </div>
   </div>
   <script src="popup.js"></script>

@@ -20,6 +20,12 @@ h2 {
   color: #333;
 }
 
+h3 {
+  margin-top: 15px;
+  margin-bottom: 10px;
+  color: #555;
+}
+
 .toggle-container {
   display: flex;
   align-items: center;
@@ -98,7 +104,13 @@ input:checked + .slider:before {
 
 #domain-input,
 #keyword-input,
-#desc-keyword-input {
+#desc-keyword-input,
+#password-input,
+#confirm-password-input,
+#unlock-password-input,
+#initial-password-input,
+#initial-confirm-password-input,
+#initial-unlock-password-input {
   flex: 1;
   padding: 8px;
   border: 1px solid #ccc;
@@ -109,7 +121,13 @@ input:checked + .slider:before {
 #add-keyword,
 #add-desc-keyword,
 #import-config,
-#export-config {
+#export-config,
+#set-password,
+#unlock-settings,
+#disable-password,
+#initial-set-password,
+#initial-unlock-settings,
+#initial-disable-password {
   padding: 8px 12px;
   background-color: #0078d4;
   color: white;
@@ -122,18 +140,36 @@ input:checked + .slider:before {
 #add-keyword:hover,
 #add-desc-keyword:hover,
 #import-config:hover,
-#export-config:hover {
+#export-config:hover,
+#set-password:hover,
+#unlock-settings:hover,
+#disable-password:hover,
+#initial-set-password:hover,
+#initial-unlock-settings:hover,
+#initial-disable-password:hover {
   background-color: #005a9e;
 }
 
 #import-config,
-#export-config {
+#export-config,
+#set-password,
+#unlock-settings,
+#disable-password,
+#initial-set-password,
+#initial-unlock-settings,
+#initial-disable-password {
   border-radius: 4px;
   margin-right: 10px;
 }
 
 #import-config:last-child,
-#export-config:last-child {
+#export-config:last-child,
+#set-password:last-child,
+#unlock-settings:last-child,
+#disable-password:last-child,
+#initial-set-password:last-child,
+#initial-unlock-settings:last-child,
+#initial-disable-password:last-child {
   margin-right: 0;
 }
 

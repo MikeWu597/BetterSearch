@@ -1,5 +1,21 @@
 // popup.js - Handle popup interactions
+
 document.addEventListener('DOMContentLoaded', function() {
+  // Password protection elements
+  const setPasswordContainer = document.getElementById('set-password-container');
+  const unlockContainer = document.getElementById('unlock-container');
+  const passwordEnabledContainer = document.getElementById('password-enabled-container');
+  const passwordInput = document.getElementById('password-input');
+  const confirmPasswordInput = document.getElementById('confirm-password-input');
+  const setPasswordButton = document.getElementById('set-password');
+  const unlockPasswordInput = document.getElementById('unlock-password-input');
+  const unlockSettingsButton = document.getElementById('unlock-settings');
+  const disablePasswordButton = document.getElementById('disable-password');
+  
+  // Main content element
+  const mainContent = document.getElementById('main-content');
+  const passwordSection = document.getElementById('password-section');
+  
   // Get DOM elements for domains
   const domainInput = document.getElementById('domain-input');
   const addDomainButton = document.getElementById('add-domain');
@@ -23,57 +39,198 @@ document.addEventListener('DOMContentLoaded', function() {
   // Get DOM element for extension toggle
   const extensionToggle = document.getElementById('extension-toggle');
 
-  // Load domains, keywords and description keywords from storage and display them
-  loadDomains();
-  loadKeywords();
-  loadDescKeywords();
-  loadExtensionStatus();
+  // Check if password protection is enabled
+  checkPasswordProtection();
 
+  // Password protection functions
+  function checkPasswordProtection() {
+    chrome.storage.sync.get(['passwordProtectionEnabled', 'passwordHash'], function(result) {
+      console.log("Checking password protection:", result);
+      if (result.passwordProtectionEnabled && result.passwordHash) {
+        // Password is set, show unlock screen
+        console.log("Password is set, showing unlock screen");
+        setPasswordContainer.style.display = 'none';
+        passwordEnabledContainer.style.display = 'block';
+        unlockContainer.style.display = 'block';
+        mainContent.style.display = 'none';
+      } else if (result.passwordProtectionEnabled && !result.passwordHash) {
+        // Password protection enabled but no password set
+        console.log("Password protection enabled but no password set");
+        setPasswordContainer.style.display = 'block';
+        passwordEnabledContainer.style.display = 'block';
+        unlockContainer.style.display = 'none';
+        mainContent.style.display = 'none';
+      } else {
+        // No password protection
+        console.log("No password protection, showing main content");
+        setPasswordContainer.style.display = 'block';
+        passwordEnabledContainer.style.display = 'none';
+        unlockContainer.style.display = 'none';
+        mainContent.style.display = 'block';
+        
+        // Load domains, keywords and description keywords from storage and display them
+        loadDomains();
+        loadKeywords();
+        loadDescKeywords();
+        loadExtensionStatus();
+      }
+    });
+  }
+
+  // Set password button click event
+  setPasswordButton.addEventListener('click', setPassword);
+  
+  // Unlock settings button click event
+  unlockSettingsButton.addEventListener('click', unlockSettings);
+  
+  // Disable password button click event
+  disablePasswordButton.addEventListener('click', disablePassword);
+  
   // Add domain button click event
-  addDomainButton.addEventListener('click', addDomain);
+  addDomainButton.addEventListener('click', function() {
+    if (isUnlocked()) {
+      addDomain();
+    }
+  });
 
   // Add domain when Enter key is pressed in the input field
   domainInput.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && isUnlocked()) {
       addDomain();
     }
   });
 
   // Add keyword button click event
-  addKeywordButton.addEventListener('click', addKeyword);
+  addKeywordButton.addEventListener('click', function() {
+    if (isUnlocked()) {
+      addKeyword();
+    }
+  });
 
   // Add keyword when Enter key is pressed in the input field
   keywordInput.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && isUnlocked()) {
       addKeyword();
     }
   });
   
   // Add description keyword button click event
-  addDescKeywordButton.addEventListener('click', addDescKeyword);
+  addDescKeywordButton.addEventListener('click', function() {
+    if (isUnlocked()) {
+      addDescKeyword();
+    }
+  });
 
   // Add description keyword when Enter key is pressed in the input field
   descKeywordInput.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && isUnlocked()) {
       addDescKeyword();
     }
   });
   
   // Extension toggle change event
   extensionToggle.addEventListener('change', function() {
-    chrome.storage.sync.set({extensionEnabled: extensionToggle.checked});
+    if (isUnlocked()) {
+      chrome.storage.sync.set({extensionEnabled: extensionToggle.checked});
+    }
   });
   
   // Export configuration button click event
-  exportConfigButton.addEventListener('click', exportConfiguration);
+  exportConfigButton.addEventListener('click', function() {
+    if (isUnlocked()) {
+      exportConfiguration();
+    }
+  });
   
   // Import configuration button click event
   importConfigButton.addEventListener('click', function() {
-    importFileInput.click();
+    if (isUnlocked()) {
+      importFileInput.click();
+    }
   });
   
   // Import file change event
-  importFileInput.addEventListener('change', importConfiguration);
+  importFileInput.addEventListener('change', function(event) {
+    if (isUnlocked()) {
+      importConfiguration(event);
+    }
+  });
+
+  // Set password function
+  function setPassword() {
+    const password = passwordInput.value;
+    const confirmPassword = confirmPasswordInput.value;
+    
+    if (!password) {
+      alert('Please enter a password');
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+    
+    // Hash the password before storing (simple approach for this extension)
+    const passwordHash = btoa(password); // Base64 encoding (not secure but sufficient for local storage)
+    
+    chrome.storage.sync.set({
+      passwordProtectionEnabled: true,
+      passwordHash: passwordHash
+    }, function() {
+      passwordInput.value = '';
+      confirmPasswordInput.value = '';
+      console.log('Password set successfully'); // Debug log
+      checkPasswordProtection();
+      alert('Password protection enabled!');
+    });
+  }
+
+  // Unlock settings function
+  function unlockSettings() {
+    const password = unlockPasswordInput.value;
+    
+    if (!password) {
+      alert('Please enter your password');
+      return;
+    }
+    
+    chrome.storage.sync.get(['passwordHash'], function(result) {
+      console.log('Checking password:', result); // Debug log
+      if (result.passwordHash) {
+        const enteredHash = btoa(password);
+        if (enteredHash === result.passwordHash) {
+          // Correct password
+          console.log('Correct password entered'); // Debug log
+          unlockContainer.style.display = 'none';
+          mainContent.style.display = 'block';
+          unlockPasswordInput.value = '';
+          
+          // Load domains, keywords and description keywords from storage and display them
+          loadDomains();
+          loadKeywords();
+          loadDescKeywords();
+          loadExtensionStatus();
+        } else {
+          alert('Incorrect password');
+        }
+      }
+    });
+  }
+
+  // Disable password function
+  function disablePassword() {
+    chrome.storage.sync.remove(['passwordProtectionEnabled', 'passwordHash'], function() {
+      console.log('Password protection disabled'); // Debug log
+      checkPasswordProtection();
+      alert('Password protection disabled!');
+    });
+  }
+
+  // Check if settings are unlocked
+  function isUnlocked() {
+    return mainContent.style.display === 'block';
+  }
 
   // Load domains from chrome storage
   function loadDomains() {
